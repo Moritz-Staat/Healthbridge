@@ -1,4 +1,7 @@
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
+// Server-side uses internal Docker URL, client-side uses public URL
+const API = typeof window === 'undefined'
+  ? (process.env.API_URL ?? 'http://localhost:4000')
+  : (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000')
 
 async function request<T>(path: string, token: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API}${path}`, {
