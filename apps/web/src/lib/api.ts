@@ -69,6 +69,23 @@ export const api = {
   getBonus: (token: string, patientId: string) =>
     request(`/api/patients/${patientId}/bonus`, token),
 
+  // Family
+  getFamilyPatients: (token: string) => request('/api/family/my-patients', token),
+  getFamilyPatientOverview: (token: string, patientId: string) =>
+    request(`/api/family/patient/${patientId}/overview`, token),
+  getFamilyGlucoseHistory: (token: string, patientId: string) =>
+    request(`/api/family/patient/${patientId}/glucose-history`, token),
+  getFamilyAlerts: (token: string, patientId: string) =>
+    request(`/api/family/patient/${patientId}/alerts`, token),
+
+  // Dispenser
+  getDispenserStatus: (token: string, patientId: string) =>
+    request(`/api/dispenser/patient/${patientId}/status`, token),
+  simulateDispense: (token: string, patientId: string, medicationId: string) =>
+    request(`/api/dispenser/patient/${patientId}/simulate-dispense`, token, {
+      method: 'POST', body: JSON.stringify({ medicationId }),
+    }),
+
   // Insurance
   getInsuranceMe: (token: string) => request('/api/insurance/me', token),
   getInsurancePatients: (token: string) => request('/api/insurance/me/patients', token),

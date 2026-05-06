@@ -19,7 +19,7 @@ export type AlertType =
   | 'BONUS_ACHIEVED'
 
 export type AlertSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
-export type DeviceType = 'APPLE_WATCH' | 'FITBIT' | 'GARMIN' | 'CGM_SENSOR' | 'BLOOD_PRESSURE_CUFF' | 'SMART_SCALE'
+export type DeviceType = 'APPLE_WATCH' | 'FITBIT' | 'GARMIN' | 'CGM_SENSOR' | 'BLOOD_PRESSURE_CUFF' | 'SMART_SCALE' | 'SMART_DISPENSER'
 export type BonusCategory = 'MEDICATION_ADHERENCE' | 'ACTIVITY_GOAL' | 'REGULAR_CHECK_IN' | 'HEALTH_IMPROVEMENT'
 export type Frequency = 'ONCE_DAILY' | 'TWICE_DAILY' | 'THREE_TIMES_DAILY' | 'WEEKLY_ONCE' | 'AS_NEEDED'
 

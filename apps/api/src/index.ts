@@ -8,6 +8,8 @@ import { healthMetricsRouter } from './modules/health-metrics/health-metrics.rou
 import { medicationsRouter } from './modules/medications/medications.router'
 import { alertsRouter } from './modules/alerts/alerts.router'
 import { insuranceRouter } from './modules/insurance/insurance.router'
+import { familyRouter } from './modules/family/family.router'
+import { dispenserRouter } from './modules/dispenser/dispenser.router'
 import { initSocket } from './websocket/alert.socket'
 import { startMedicationCheckJob } from './jobs/medication-check.job'
 import prismaPlugin from './plugins/prisma'
@@ -31,6 +33,8 @@ async function main() {
   await app.register(medicationsRouter, { prefix: '/api/patients' })
   await app.register(alertsRouter, { prefix: '/api/patients' })
   await app.register(insuranceRouter, { prefix: '/api/insurance' })
+  await app.register(familyRouter, { prefix: '/api/family' })
+  await app.register(dispenserRouter, { prefix: '/api/dispenser' })
 
   app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
 

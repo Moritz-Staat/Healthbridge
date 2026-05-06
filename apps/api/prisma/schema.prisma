@@ -41,6 +41,7 @@ enum DeviceType {
   CGM_SENSOR
   BLOOD_PRESSURE_CUFF
   SMART_SCALE
+  SMART_DISPENSER
 }
 
 enum BonusCategory {

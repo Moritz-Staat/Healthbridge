@@ -435,11 +435,62 @@ async function main() {
     })
   }
 
+  // Family Member User (Anna Mustermann, Ehefrau)
+  const annaUser = await prisma.user.upsert({
+    where: { email: 'anna@family.de' },
+    update: {},
+    create: {
+      email: 'anna@family.de',
+      passwordHash: await bcrypt.hash('password123', 12),
+      role: 'FAMILY_MEMBER',
+    },
+  })
+
+  // Link Anna als FamilyMember zu Max
+  const existingFamilyMember = await prisma.familyMember.findFirst({
+    where: { patientId: patient.id, email: 'anna@family.de' }
+  })
+  if (!existingFamilyMember) {
+    await prisma.familyMember.create({
+      data: {
+        userId: annaUser.id,
+        patientId: patient.id,
+        fullName: 'Anna Mustermann',
+        relationship: 'Ehefrau',
+        email: 'anna@family.de',
+        notificationsEnabled: true,
+      },
+    })
+  } else {
+    await prisma.familyMember.update({
+      where: { id: existingFamilyMember.id },
+      data: { userId: annaUser.id },
+    })
+  }
+
+  // Smart Dispenser Device
+  const existingDispenser = await prisma.wearableDevice.findFirst({
+    where: { patientId: patient.id, deviceType: 'SMART_DISPENSER' }
+  })
+  if (!existingDispenser) {
+    await prisma.wearableDevice.create({
+      data: {
+        patientId: patient.id,
+        deviceName: 'HealthBridge Dispenser v2',
+        deviceType: 'SMART_DISPENSER',
+        serialNumber: 'HBD-2024-00142',
+        isActive: true,
+        connectedSince: subDays(today, 85),
+      },
+    })
+  }
+
   console.log('Seed complete!')
   console.log('Demo accounts:')
   console.log('  Patient:          patient@healthbridge.de / password123')
   console.log('  Insurance Admin:  admin@aok.de / password123')
   console.log('  System Admin:     admin@healthbridge.de / password123')
+  console.log('  Family Member:    anna@family.de / password123')
 }
 
 main().catch(console.error).finally(() => prisma.$disconnect())

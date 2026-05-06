@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: '/patient/medications', label: 'Medikamente' },
   { href: '/patient/appointments', label: 'Termine' },
   { href: '/patient/alerts', label: 'Warnungen' },
+  { href: '/patient/dispenser', label: 'Dispenser' },
   { href: '/patient/profile', label: 'Profil' },
 ]
 
