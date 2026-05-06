@@ -421,21 +421,7 @@ async function main() {
     ],
   })
 
-  // ── Family Member ─────────────────────────────────────────────────────────
-  const existingFamily = await prisma.familyMember.findMany({ where: { patientId: patient.id } })
-  if (existingFamily.length === 0) {
-    await prisma.familyMember.create({
-      data: {
-        patientId: patient.id,
-        fullName: 'Anna Mustermann',
-        relationship: 'Ehefrau',
-        email: 'anna@family.de',
-        notificationsEnabled: true,
-      },
-    })
-  }
-
-  // Family Member User (Anna Mustermann, Ehefrau)
+  // ── Family Member User (Anna Mustermann, Ehefrau) ────────────────────────
   const annaUser = await prisma.user.upsert({
     where: { email: 'anna@family.de' },
     update: {},
@@ -446,7 +432,12 @@ async function main() {
     },
   })
 
-  // Link Anna als FamilyMember zu Max
+  // Cleanup: remove any family member records without userId (from old seed runs)
+  await prisma.familyMember.deleteMany({
+    where: { patientId: patient.id, email: 'anna@family.de', userId: null },
+  })
+
+  // Upsert the linked FamilyMember record
   const existingFamilyMember = await prisma.familyMember.findFirst({
     where: { patientId: patient.id, email: 'anna@family.de' }
   })
@@ -460,11 +451,6 @@ async function main() {
         email: 'anna@family.de',
         notificationsEnabled: true,
       },
-    })
-  } else {
-    await prisma.familyMember.update({
-      where: { id: existingFamilyMember.id },
-      data: { userId: annaUser.id },
     })
   }
 
