@@ -1,0 +1,35 @@
+{
+  "name": "@healthbridge/api",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.14.0",
+    "fastify": "^4.27.0",
+    "@fastify/jwt": "^8.0.0",
+    "@fastify/cors": "^9.0.0",
+    "@fastify/cookie": "^9.3.0",
+    "@fastify/rate-limit": "^9.1.0",
+    "socket.io": "^4.7.5",
+    "bcryptjs": "^2.4.3",
+    "zod": "^3.23.0",
+    "node-cron": "^3.0.3",
+    "ioredis": "^5.3.2",
+    "date-fns": "^3.6.0",
+    "@healthbridge/shared-types": "*"
+  },
+  "devDependencies": {
+    "prisma": "^5.14.0",
+    "tsx": "^4.11.0",
+    "typescript": "^5.4.0",
+    "@types/node": "^20.12.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node-cron": "^3.0.11"
+  }
+}

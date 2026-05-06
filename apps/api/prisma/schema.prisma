@@ -1,0 +1,231 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MetricType {
+  BLOOD_GLUCOSE
+  HEART_RATE
+  STEPS
+  BLOOD_PRESSURE_SYSTOLIC
+  BLOOD_PRESSURE_DIASTOLIC
+  OXYGEN_SATURATION
+  SLEEP_HOURS
+  BODY_WEIGHT
+}
+
+enum AlertType {
+  MEDICATION_MISSED
+  GLUCOSE_HIGH
+  GLUCOSE_LOW
+  HEART_RATE_ANOMALY
+  INACTIVITY_WARNING
+  BONUS_ACHIEVED
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum DeviceType {
+  APPLE_WATCH
+  FITBIT
+  GARMIN
+  CGM_SENSOR
+  BLOOD_PRESSURE_CUFF
+  SMART_SCALE
+}
+
+enum BonusCategory {
+  MEDICATION_ADHERENCE
+  ACTIVITY_GOAL
+  REGULAR_CHECK_IN
+  HEALTH_IMPROVEMENT
+}
+
+enum Frequency {
+  ONCE_DAILY
+  TWICE_DAILY
+  THREE_TIMES_DAILY
+  WEEKLY_ONCE
+  AS_NEEDED
+}
+
+enum UserRole {
+  PATIENT
+  FAMILY_MEMBER
+  INSURANCE_ADMIN
+  SYSTEM_ADMIN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  patient        Patient?
+  familyMember   FamilyMember?
+  insuranceAdmin InsuranceAdmin?
+}
+
+model Patient {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName     String
+  dateOfBirth  DateTime
+  phone        String?
+  consentGiven Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  insuranceId String?
+  insurance   InsuranceCompany? @relation(fields: [insuranceId], references: [id])
+
+  healthMetrics   HealthMetric[]
+  medications     Medication[]
+  familyMembers   FamilyMember[]
+  alerts          Alert[]
+  wearableDevices WearableDevice[]
+  bonusPoints     BonusPoint[]
+  appointments    Appointment[]
+}
+
+model HealthMetric {
+  id         String     @id @default(cuid())
+  patientId  String
+  patient    Patient    @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  deviceId   String?
+  device     WearableDevice? @relation(fields: [deviceId], references: [id])
+  metricType MetricType
+  value      Decimal    @db.Decimal(10, 4)
+  unit       String
+  measuredAt DateTime
+  createdAt  DateTime   @default(now())
+
+  @@index([patientId, metricType, measuredAt])
+}
+
+model Medication {
+  id        String    @id @default(cuid())
+  patientId String
+  patient   Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  name      String
+  dosage    String
+  frequency Frequency
+  startDate DateTime
+  endDate   DateTime?
+  notes     String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  logs MedicationLog[]
+}
+
+model MedicationLog {
+  id            String     @id @default(cuid())
+  medicationId  String
+  medication    Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  takenAt       DateTime   @default(now())
+  confirmed     Boolean
+  skippedReason String?
+}
+
+model FamilyMember {
+  id                   String   @id @default(cuid())
+  userId               String?  @unique
+  user                 User?    @relation(fields: [userId], references: [id])
+  patientId            String
+  patient              Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  fullName             String
+  relationship         String
+  email                String
+  notificationsEnabled Boolean  @default(true)
+  createdAt            DateTime @default(now())
+}
+
+model Alert {
+  id          String        @id @default(cuid())
+  patientId   String
+  patient     Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  alertType   AlertType
+  severity    AlertSeverity
+  message     String
+  triggeredAt DateTime      @default(now())
+  resolved    Boolean       @default(false)
+  resolvedAt  DateTime?
+
+  @@index([patientId, resolved, triggeredAt])
+}
+
+model WearableDevice {
+  id             String     @id @default(cuid())
+  patientId      String
+  patient        Patient    @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  deviceName     String
+  deviceType     DeviceType
+  serialNumber   String?
+  externalId     String?
+  accessToken    String?
+  connectedSince DateTime   @default(now())
+  isActive       Boolean    @default(true)
+
+  healthMetrics HealthMetric[]
+}
+
+model Appointment {
+  id              String   @id @default(cuid())
+  patientId       String
+  patient         Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  title           String
+  appointmentDate DateTime
+  doctorName      String?
+  location        String?
+  notes           String?
+  completed       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+}
+
+model InsuranceCompany {
+  id                 String   @id @default(cuid())
+  name               String
+  contractNumber     String   @unique
+  bonusProgramActive Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  patients    Patient[]
+  bonusPoints BonusPoint[]
+  admins      InsuranceAdmin[]
+}
+
+model InsuranceAdmin {
+  id          String           @id @default(cuid())
+  userId      String           @unique
+  user        User             @relation(fields: [userId], references: [id])
+  insuranceId String
+  insurance   InsuranceCompany @relation(fields: [insuranceId], references: [id])
+}
+
+model BonusPoint {
+  id          String           @id @default(cuid())
+  patientId   String
+  patient     Patient          @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  insuranceId String
+  insurance   InsuranceCompany @relation(fields: [insuranceId], references: [id])
+  points      Int
+  reason      String
+  category    BonusCategory
+  earnedAt    DateTime         @default(now())
+
+  @@index([patientId, insuranceId])
+}
