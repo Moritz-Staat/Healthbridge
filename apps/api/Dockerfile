@@ -1,10 +1,20 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY package*.json ./
-COPY prisma ./prisma
+
+# Copy monorepo structure
+COPY package*.json turbo.json ./
+COPY packages/ ./packages/
+COPY apps/api/package*.json ./apps/api/
+
+# Install all workspace dependencies
 RUN npm install
-RUN npx prisma generate
-COPY . .
-RUN npm run build
+
+# Copy API source
+COPY apps/api/ ./apps/api/
+
+# Generate Prisma client
+RUN cd apps/api && npx prisma generate
+
 EXPOSE 4000
-CMD ["node", "dist/index.js"]
+WORKDIR /app/apps/api
+CMD ["npx", "tsx", "src/index.ts"]
