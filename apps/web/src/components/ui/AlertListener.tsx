@@ -10,7 +10,11 @@ export function AlertListener({ patientId }: Props) {
   const [toasts, setToasts] = useState<(Alert & { key: number })[]>([])
 
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000')
+    // Derive API URL from current host at runtime (avoids Next.js build-time baking issue)
+    const apiUrl = window.location.hostname === 'localhost'
+      ? 'http://localhost:4000'
+      : `${window.location.protocol}//healthbridge-api.${window.location.hostname.replace('healthbridge.', '')}`
+    const socket = io(apiUrl, { transports: ['websocket', 'polling'] })
     socket.emit('join', `patient:${patientId}`)
 
     socket.on('alert:new', (alert: Alert) => {
